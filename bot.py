@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import time
+from selenium.webdriver.common.keys import Keys
 
 # Configurações principais
 DB_PATH = "/root/lais-backend/db.sqlite3"
@@ -30,14 +31,14 @@ agendamentos = cursor.fetchall()
 
 def enviar_mensagem(numero, mensagem):
     try:
-        numero_limpo = ''.join(filter(str.isdigit, numero))  # Remove qualquer traço, espaço, etc.
+        numero_limpo = ''.join(filter(str.isdigit, numero))
         url = f"https://web.whatsapp.com/send?phone=55{numero_limpo}&text={mensagem}"
         driver.get(url)
         time.sleep(10)
 
-        # Tenta clicar no botão de envio
-        botao_enviar = driver.find_element(By.XPATH, '//div[@aria-label="Enviar"]')
-        botao_enviar.click()
+        # Aguardar a caixa de mensagem e simular ENTER
+        caixa = driver.find_element(By.XPATH, '//div[@contenteditable="true"][@data-tab="10"]')
+        caixa.send_keys(Keys.ENTER)
         time.sleep(5)
         return True
     except Exception as e:
