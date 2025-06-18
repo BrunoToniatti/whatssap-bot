@@ -53,7 +53,7 @@ for agendamento in agendamentos:
     sucesso = enviar_mensagem(telefone, MENSAGEM)
 
     if sucesso:
-        cursor.execute("UPDATE appointments SET enviado = 1 WHERE id = ?", (ag_id,))
+        cursor.execute("UPDATE appointments SET send_confirmation_email = 1 WHERE id = ?", (ag_id,))
         conn.commit()
         print("✅ Mensagem enviada com sucesso!")
     else:
