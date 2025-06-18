@@ -25,7 +25,7 @@ conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
 # Buscar agendamentos que ainda não foram enviados
-cursor.execute("SELECT id, client_name, client_phone FROM appointments WHERE enviado = 0")
+cursor.execute("SELECT id, client_name, client_phone FROM appointments WHERE send_confirmation_email = 0")
 agendamentos = cursor.fetchall()
 
 def enviar_mensagem(numero, mensagem):
