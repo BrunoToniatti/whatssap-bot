@@ -9,7 +9,9 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # Configurações principais
 DB_PATH = "/root/lais-backend/db.sqlite3"
@@ -17,7 +19,7 @@ CHROMEDRIVER_PATH = "/usr/local/bin/chromedriver"
 WHATSAPP_SESSION_PATH = "/root/perfil-lais"
 MENSAGEM = "Olá, aqui é o sistema da Lais confirmando seu agendamento. ❤️"
 
-# Trava de execução (para evitar execuções simultâneas)
+# Trava para evitar execução dupla
 LOCK_PATH = "/tmp/lais_bot.lock"
 lock_file = open(LOCK_PATH, "w")
 try:
@@ -26,27 +28,25 @@ except BlockingIOError:
     print("⚠️ Outro processo do bot já está em execução.")
     sys.exit(1)
 
-# Cria cópia temporária do perfil para evitar conflito
+# Perfil temporário
 perfil_temp = f"/tmp/perfil-lais-{uuid.uuid4()}"
 def ignorar_arquivos(src, names):
     return [n for n in names if n.startswith("Singleton")]
-
 shutil.copytree(WHATSAPP_SESSION_PATH, perfil_temp, ignore=ignorar_arquivos)
 
-# Configura opções do navegador
+# Configura navegador
 options = Options()
 options.add_argument(f"--user-data-dir={perfil_temp}")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
-# options.add_argument("--headless=new")  # opcional, se quiser headless de fato
 
 driver = webdriver.Chrome(service=Service(CHROMEDRIVER_PATH), options=options)
 
-# Conectar ao banco
+# Banco de dados
 conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
-# Filtra por data, se fornecida
+# Filtro por data
 print(f'Argumentos fornecidos: {sys.argv}')
 if len(sys.argv) > 1:
     try:
@@ -80,18 +80,22 @@ def enviar_mensagem(numero, mensagem):
         time.sleep(15)
         driver.save_screenshot(f"/root/print_antes_{numero_limpo}.png")
 
-        print("🖱️ Tentando clicar no botão de enviar...")
+        print("🕵️ Aguardando botão de envio aparecer...")
+        botao = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div/div[4]/button'))
+        )
 
-        botao = driver.find_element("xpath", '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div/div[4]/button')
+        time.sleep(1)
+        driver.execute_script("arguments[0].click();", botao)
+        time.sleep(1)
         driver.execute_script("arguments[0].click();", botao)
 
-        time.sleep(5)
+        print("✅ Clique real realizado.")
         driver.save_screenshot(f"/root/print_depois_{numero_limpo}.png")
-
-        print("✅ Mensagem enviada via clique.")
         return True
+
     except Exception as e:
-        print(f"❌ Erro ao enviar para {numero}: {e}")
+        print(f"❌ Falha ao enviar para {numero}: {e}")
         return False
 
 # Loop de envio
@@ -106,7 +110,7 @@ for agendamento in agendamentos:
         conn.commit()
         print("✅ Mensagem marcada como enviada.")
     else:
-        print("⚠️ Falha no envio. Não foi marcada como enviada.")
+        print("⚠️ Falha no envio. Não será marcada.")
 
 # Finaliza
 driver.quit()
