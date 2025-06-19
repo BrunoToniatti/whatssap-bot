@@ -26,7 +26,7 @@ shutil.copytree(WHATSAPP_SESSION_PATH, perfil_temp, ignore=ignorar_arquivos)
 
 options = Options()
 options.add_argument(f"--user-data-dir={perfil_temp}")
-options.add_argument("--headless=new")
+# options.add_argument("--headless=new")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 
