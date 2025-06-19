@@ -38,6 +38,7 @@ conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
 # Filtra por data, se fornecida
+print(sys.argv)
 if len(sys.argv) > 1:
     try:
         filtro_data = datetime.strptime(sys.argv[1], "%Y-%m-%d").date()
