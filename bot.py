@@ -68,11 +68,11 @@ def enviar_mensagem(numero, mensagem):
         url = f"https://web.whatsapp.com/send?phone=55{numero_limpo}&text={mensagem}"
         driver.get(url)
         time.sleep(15)
-        driver.save_screenshot(f"/root/print_debug_{numero_limpo}.png")
+        driver.save_screenshot(f"/root/print_debug_{numero_limpo}3.png")
 
         # Simula pressionar ENTER mesmo sem localizar caixa
         caixa = driver.find_element("xpath", '//div[@contenteditable="true"][@data-tab="10"]')
-        caixa.send_keys(Keys.ENTER) 
+        caixa.send_keys(mensagem + Keys.ENTER)
         time.sleep(5)
         return True
     except Exception as e:
