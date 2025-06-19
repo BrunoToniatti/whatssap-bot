@@ -1,9 +1,12 @@
+# /root/whatssap-bot/bot.py
+import sys
 import sqlite3
+import time
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-import time
 from selenium.webdriver.common.keys import Keys
 
 # Configurações principais
@@ -25,8 +28,29 @@ driver = webdriver.Chrome(service=Service(CHROMEDRIVER_PATH), options=options)
 conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
-# Buscar agendamentos que ainda não foram enviados
-cursor.execute("SELECT id, client_name, client_phone FROM appointments WHERE send_confirmation_email = 0")
+# Filtra por data, se fornecida
+if len(sys.argv) > 1:
+    try:
+        filtro_data = datetime.strptime(sys.argv[1], "%Y-%m-%d").date()
+        print(f"📆 Filtrando agendamentos por data: {filtro_data}")
+        cursor.execute("""
+            SELECT id, client_name, client_phone
+            FROM appointments
+            WHERE send_confirmation_email = 0 AND appointment_date = ?
+        """, (filtro_data,))
+    except ValueError:
+        print("❌ Data inválida. Use o formato YYYY-MM-DD.")
+        driver.quit()
+        conn.close()
+        sys.exit(1)
+else:
+    print("📆 Sem filtro de data. Buscando todos não enviados.")
+    cursor.execute("""
+        SELECT id, client_name, client_phone
+        FROM appointments
+        WHERE send_confirmation_email = 0
+    """)
+
 agendamentos = cursor.fetchall()
 
 def enviar_mensagem(numero, mensagem):
@@ -36,7 +60,6 @@ def enviar_mensagem(numero, mensagem):
         driver.get(url)
         time.sleep(10)
 
-        # Aguardar a caixa de mensagem e simular ENTER
         caixa = driver.find_element(By.XPATH, '//div[@contenteditable="true"][@data-tab="10"]')
         caixa.send_keys(Keys.ENTER)
         time.sleep(5)
