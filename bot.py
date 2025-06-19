@@ -1,4 +1,6 @@
 # /root/whatssap-bot/bot.py
+import uuid
+import shutil
 import sys
 import sqlite3
 import time
@@ -15,9 +17,16 @@ CHROMEDRIVER_PATH = "/usr/local/bin/chromedriver"
 WHATSAPP_SESSION_PATH = "/root/perfil-lais"
 MENSAGEM = "Olá, aqui é o sistema da Lais confirmando seu agendamento. ❤️"
 
-# Configuração do navegador headless com sessão da Lais
+
+# Cria cópia temporária do perfil para evitar conflito
+perfil_temp = f"/tmp/perfil-lais-{uuid.uuid4()}"
+def ignorar_arquivos(src, names):
+    return [n for n in names if n.startswith("Singleton")]
+
+shutil.copytree(WHATSAPP_SESSION_PATH, perfil_temp, ignore=ignorar_arquivos)
+
 options = Options()
-options.add_argument(f"--user-data-dir={WHATSAPP_SESSION_PATH}")
+options.add_argument(f"--user-data-dir={perfil_temp}")
 options.add_argument("--headless=new")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
@@ -85,3 +94,4 @@ for agendamento in agendamentos:
 # Finaliza
 driver.quit()
 conn.close()
+shutil.rmtree(perfil_temp, ignore_errors=True)
