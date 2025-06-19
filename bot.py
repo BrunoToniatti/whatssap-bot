@@ -8,15 +8,14 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 
 # Configurações principais
 DB_PATH = "/root/lais-backend/db.sqlite3"
 CHROMEDRIVER_PATH = "/usr/local/bin/chromedriver"
 WHATSAPP_SESSION_PATH = "/root/perfil-lais"
 MENSAGEM = "Olá, aqui é o sistema da Lais confirmando seu agendamento. ❤️"
-
 
 # Cria cópia temporária do perfil para evitar conflito
 perfil_temp = f"/tmp/perfil-lais-{uuid.uuid4()}"
@@ -70,8 +69,8 @@ def enviar_mensagem(numero, mensagem):
         driver.get(url)
         time.sleep(10)
 
-        caixa = driver.find_element(By.XPATH, '//div[@contenteditable="true"][@data-tab="10"]')
-        caixa.send_keys(Keys.ENTER)
+        # Simula pressionar ENTER mesmo sem localizar caixa
+        ActionChains(driver).send_keys(Keys.ENTER).perform()
         time.sleep(5)
         return True
     except Exception as e:
