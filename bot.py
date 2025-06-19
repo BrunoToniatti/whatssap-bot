@@ -68,6 +68,7 @@ def enviar_mensagem(numero, mensagem):
         url = f"https://web.whatsapp.com/send?phone=55{numero_limpo}&text={mensagem}"
         driver.get(url)
         time.sleep(10)
+        driver.save_screenshot(f"/root/print_debug_{numero_limpo}.png")
 
         # Simula pressionar ENTER mesmo sem localizar caixa
         ActionChains(driver).send_keys(Keys.ENTER).perform()
