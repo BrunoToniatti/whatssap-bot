@@ -68,12 +68,11 @@ def enviar_mensagem(numero, mensagem):
         url = f"https://web.whatsapp.com/send?phone=55{numero_limpo}&text={mensagem}"
         driver.get(url)
         time.sleep(15)
-        driver.save_screenshot(f"/root/print_debug_{numero_limpo}778.png")
+        driver.save_screenshot(f"/root/print_debug_{numero_limpo}3.png")
 
-        print("⌨️ Tentando focar na caixa e enviar mensagem...")
-        caixas = driver.find_elements("xpath", '//div[@contenteditable="true"]')
-        caixa = caixas[-1]
-        caixa.send_keys(mensagem + Keys.ENTER)
+        print("🖱️ Tentando clicar no botão de enviar...")
+        botao = driver.find_element("xpath", '//span[@data-icon="send"]')
+        driver.execute_script("arguments[0].click();", botao)
 
         time.sleep(5)
         return True
