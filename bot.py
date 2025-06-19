@@ -71,7 +71,7 @@ def enviar_mensagem(numero, mensagem):
         driver.save_screenshot(f"/root/print_debug_{numero_limpo}3.png")
 
         print("🖱️ Tentando clicar no botão de enviar...")
-        botao = driver.find_element("xpath", '//span[@data-icon="send"]')
+        botao = driver.find_element("xpath", '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div/div[4]/button')
         driver.execute_script("arguments[0].click();", botao)
 
         time.sleep(5)
